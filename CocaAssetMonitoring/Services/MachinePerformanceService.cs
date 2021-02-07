@@ -22,7 +22,7 @@ namespace CocaAssetMonitoring.Services
 
         public async Task ProcessAsync()
         {
-            var machines = _context.MachineInfo.Where(r => r.StageName == "Mixing").ToList();
+            var machines = _context.MachineInfo.ToList();
             if (machines.Any())
                 foreach (var machine in machines)
                 {
@@ -31,15 +31,44 @@ namespace CocaAssetMonitoring.Services
                         MachineId = machine.MachineId,
                         TimeStamp = DateTime.Now
                     };
-                    var designedSpeed = _context.Settings.Where(r => r.MachineId == machine.MachineId).FirstOrDefault();
-                    var speedReads = _interfaceDb.ConfigsTwo.Where(r => r.MachineId == machine.MachineId
-                                                                    && r.TimeStamp >= DateTime.Now.AddDays(-15)
-                                                                    && r.TimeStamp <= DateTime.Now).ToList();
-                    if (designedSpeed != null)
+
+                    if (machine.StageName == "Mixer")
                     {
-                        var machineSpeed = speedReads.Select(r => r.ActualSpeed).DefaultIfEmpty(0).Average();
-                        machinePerformance.Performance = machineSpeed/ designedSpeed.DesignedSpeed;
+                        var designedSpeed = _context.Settings.Where(r => r.MachineId == machine.MachineId).FirstOrDefault();
+                        var speedReads = _interfaceDb.ConfigsTwo.Where(r => r.MachineId == machine.MachineId
+                                                                        && r.TimeStamp >= DateTime.Now.AddMinutes(-15)
+                                                                        && r.TimeStamp <= DateTime.Now).ToList();
+                        if (designedSpeed != null)
+                        {
+                            var machineSpeed = speedReads.Select(r => r.ActualSpeed).DefaultIfEmpty(0).Average();
+                            machinePerformance.Performance = machineSpeed / designedSpeed.DesignedSpeed;
+                        }
                     }
+                    else if(machine.StageName == "Palletizer")
+                    {
+                        var designedSpeed = _context.Settings.Where(r => r.MachineId == machine.MachineId).FirstOrDefault();
+                        var speedReads = _interfaceDb.ConfigsThree.Where(r => r.MachineId == machine.MachineId
+                                                                        && r.TimeStamp >= DateTime.Now.AddMinutes(-15)
+                                                                        && r.TimeStamp <= DateTime.Now).ToList();
+                        if (designedSpeed != null)
+                        {
+                            var palletCount = speedReads.Select(r => r.PallateCount).DefaultIfEmpty(0).Average();
+                            var machineSpeed = (decimal)palletCount / 15;
+                            machinePerformance.Performance = machineSpeed / designedSpeed.DesignedSpeed;
+                        }
+                    }
+                    else if(machine.StageName == "Filler")
+                    {
+                        var designedSpeed = _context.Settings.Where(r => r.MachineId == machine.MachineId).FirstOrDefault();
+                        var speedReads = _interfaceDb.ConfigsTwo.Where(r => r.TimeStamp >= DateTime.Now.AddMinutes(-15)
+                                                                        && r.TimeStamp <= DateTime.Now).ToList();
+                        if (designedSpeed != null)
+                        {
+                            var machineSpeed = speedReads.Select(r => r.ActualSpeed).DefaultIfEmpty(0).Average();
+                            machinePerformance.Performance = machineSpeed / designedSpeed.DesignedSpeed;
+                        }
+                    }
+                   
 
                     var statusReads = _interfaceDb.ConfigsTwo.Where(r => r.MachineId == machine.MachineId
                                                                     && r.TimeStamp >= DateTime.Today
@@ -58,23 +87,45 @@ namespace CocaAssetMonitoring.Services
 
                     if (machine.AccumulativeFlag == 0)
                     {
-                        var productionCount = _brokerDb.SignalBrokerTypeTwo.OrderByDescending(r => r.Id).Where(r => r.MachineId == machine.MachineId && r.TimeStamp >= DateTime.Now.AddMinutes(-15) && r.TimeStamp <= DateTime.Now).FirstOrDefault();
+                        var productionCount = _brokerDb.SignalBrokerTypeTwo.OrderByDescending(r => r.Id).Where(r => r.MachineId == machine.MachineId && r.TimeStamp >= DateTime.Today && r.TimeStamp <= DateTime.Now).FirstOrDefault();
                         if (productionCount != null)
                         {
                             var TotalCount = productionCount.ProductionCount;
                             var RejectedCount = productionCount.RejectedCount;
                             machinePerformance.Quality = RejectedCount / TotalCount;
                         }
+                        else
+                        {
+                            var productCount = _brokerDb.SignalBrokerTypeTwo.OrderByDescending(r => r.Id).Where(r => r.TimeStamp >= DateTime.Today 
+                                                                                                                  && r.TimeStamp <= DateTime.Now).FirstOrDefault();
+                            if(productCount!=null)
+                            {
+                                var TotalCount = productCount.ProductionCount;
+                                var RejectedCount = productCount.RejectedCount;
+                                machinePerformance.Quality = RejectedCount / TotalCount;
+                            }
+                        }
                     }
                     else if (machine.AccumulativeFlag == 1)
                     {
-                        var productionCount = _brokerDb.SignalBrokerTypeTwo.Where(r => r.MachineId == machine.MachineId && r.TimeStamp >= DateTime.Now.AddMinutes(-15) && r.TimeStamp <= DateTime.Now).ToList();
+                        var productionCount = _brokerDb.SignalBrokerTypeTwo.Where(r => r.MachineId == machine.MachineId && r.TimeStamp >= DateTime.Today && r.TimeStamp <= DateTime.Now).ToList();
                         if (productionCount.Any())
                         {
                             var TotalCount = productionCount.Select(r => r.ProductionCount).DefaultIfEmpty(0).Sum();
                             var RejectedCount = productionCount.Select(r => r.RejectedCount).DefaultIfEmpty(0).Sum();
                             machinePerformance.Quality = RejectedCount / TotalCount;
                         }
+                        else
+                        {
+                            var productCount = _brokerDb.SignalBrokerTypeTwo.Where(r => r.MachineId == machine.MachineId && r.TimeStamp >= DateTime.Today && r.TimeStamp <= DateTime.Now).ToList();
+                            if (productCount != null)
+                            {
+                                var TotalCount = productCount.Select(r => r.ProductionCount).DefaultIfEmpty(0).Sum();
+                                var RejectedCount = productCount.Select(r => r.RejectedCount).DefaultIfEmpty(0).Sum();
+                                machinePerformance.Quality = RejectedCount / TotalCount;
+                            }
+                        }
+                        machinePerformance.OEE = machinePerformance.Quality * machinePerformance.Performance * machinePerformance.Availability; 
                     }
                     _context.MachinePerformance.Add(machinePerformance);
 

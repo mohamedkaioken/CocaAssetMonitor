@@ -4,14 +4,16 @@ using CocaAssetMonitoring.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CocaAssetMonitoring.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210207103721_AddStatus")]
+    partial class AddStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,9 +201,6 @@ namespace CocaAssetMonitoring.Migrations
 
                     b.Property<string>("MachineId")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TargetQty")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 
 namespace CocaAssetMonitoring.Models.SystemModels
 {
-    public class Settings
+    public class Status
     {
         public int Id { get; set; }
+        public int State { get; set; }
         public string MachineId { get; set; }
-        public decimal DesignedSpeed { get; set; }
-        public int AccumulativeFlag { get; set; }
-        public int TargetQty { get; set; }
+        public DateTime TimeStamp { get; set; } 
     }
 }
