@@ -23,8 +23,14 @@ namespace CocaAssetMonitoring.Scheduler
             RecurringJob.AddOrUpdate<MachinePerformanceJob>(nameof(MachinePerformanceJob),
                 job => job.TriggerRecurring(),
                 "*/15 * * * *");
-
-
+            RecurringJob.RemoveIfExists(nameof(StateJob));
+            RecurringJob.AddOrUpdate<StateJob>(nameof(StateJob),
+                job => job.TriggerRecurring(),
+                "*/1 * * * *");
+            RecurringJob.RemoveIfExists(nameof(MCProcessJob));
+            RecurringJob.AddOrUpdate<MCProcessJob>(nameof(MCProcessJob),
+                job => job.TriggerRecurring(),
+                "*/10 * * * *");
 
 
 

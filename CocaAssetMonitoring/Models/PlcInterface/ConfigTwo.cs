@@ -16,6 +16,9 @@ namespace CocaAssetMonitoring.Models
         public decimal ActualSpeed { get; set; }
         public decimal MixVolume { get; set; }
         public int ProgramSelection { get; set; }
+        public int MachineMode { get; set; }
+        public decimal CO2 { get; set; }
+        public int ProdTime { get; set; }
         public DateTime TimeStamp { get; set; }
     }
 }

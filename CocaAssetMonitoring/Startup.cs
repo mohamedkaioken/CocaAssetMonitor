@@ -75,6 +75,12 @@ namespace CocaAssetMonitoring
             services.AddScoped<IMachineProcessJob, MachineProcessJob>();
             services.AddScoped<IMachineProcessService, MachineProcessService>();
 
+            services.AddScoped<IStateJob,StateJob>();
+            services.AddScoped<IStateService,StateService>();
+            
+            services.AddScoped<IMCProcessJob,MCProcessJob>();
+            services.AddScoped<IMCProcessService,MCProcessService>();
+
             services.AddScoped<IJobsScheduler, JobsScheduler>();
         }
 

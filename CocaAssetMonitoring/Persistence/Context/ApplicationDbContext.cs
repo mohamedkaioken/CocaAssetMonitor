@@ -17,6 +17,8 @@ namespace CocaAssetMonitoring.Persistence.Context
         public DbSet<MachineInfo> MachineInfo { get; set; }
         public DbSet<MCAttributes> MCAttributes { get; set; }
         public DbSet<Status> Status  { get; set; }
+        public DbSet<MCProcess> MCProcesses  { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     }
 }
