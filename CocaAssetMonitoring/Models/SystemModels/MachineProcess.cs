@@ -13,7 +13,7 @@ namespace CocaAssetMonitoring.Models.SystemModels
         public int TotalCount { get; set; }
         public int AcceptedCount { get; set; }
         public int RejectedCount { get; set; }
-        public int ActualSpeed { get; set; }
+        public decimal ActualSpeed { get; set; }
         public DateTime TimeStamp { get; set; }
     }
 }

@@ -23,7 +23,7 @@ namespace CocaAssetMonitoring.Services
 
         public async Task ProcessAsync()
         {
-            var machines = _context.MachineInfo.ToList();
+           var machines = _context.MachineInfo.ToList();
             if(machines.Any())
             {
                 foreach (var machine in machines)
@@ -104,16 +104,16 @@ namespace CocaAssetMonitoring.Services
                     }
                     else if (machine.StageName == "Palletizer")
                     {
-                        var actualSpeed = _interfaceDb.ConfigsThree.OrderByDescending(r=>r.Id).Where(r=>r.PallateCount > 0 && r.TimeStamp >= DateTime.Today && r.TimeStamp <= DateTime.Now).ToList();
+                        var actualSpeed = _interfaceDb.ConfigsThree.OrderByDescending(r=>r.Id).Where(r=>r.PallateCount > 0 && r.TimeStamp >= DateTime.Now.AddMinutes(-45) && r.TimeStamp <= DateTime.Now).ToList();
                         var firstPallete = actualSpeed.FirstOrDefault().PallateCount;
                         var lastPallete = actualSpeed.LastOrDefault().PallateCount;
-                        var diffDleta = (decimal) lastPallete- firstPallete ;
-                        var speed = diffDleta / 96;
-                        machineProcess.ActualSpeed = (int)(speed);
+                        var diffDleta = (decimal) firstPallete- lastPallete ;
+                        var speed = diffDleta / 45;
+                        machineProcess.ActualSpeed = (speed);
                     }
                     else if (machine.StageName == "Mixer")
                     {
-                        var actualSpeed = _interfaceDb.ConfigsOne.OrderByDescending(r => r.Id).Where(r => r.Syrp > 0 && r.H2O>0 && r.TimeStamp >= DateTime.Today && r.TimeStamp <= DateTime.Now).ToList();
+                        var actualSpeed = _interfaceDb.ConfigsOne.OrderByDescending(r => r.Id).Where(r => r.Syrp > 0 && r.H2O>0 && r.TimeStamp >= DateTime.Now.AddMinutes(-15) && r.TimeStamp <= DateTime.Now).ToList();
                         var firstH2O = actualSpeed.FirstOrDefault().H2O;
                         var lastH2O = actualSpeed.LastOrDefault().H2O;
                         var firstSyrp = actualSpeed.FirstOrDefault().Syrp;
